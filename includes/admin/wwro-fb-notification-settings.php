@@ -36,32 +36,40 @@ class WWRO_Settings_Facebook_Notification extends WWRO_Settings_Page
     parent::__construct();
   }
 
-  public function wr_api_new_order_notification($payment_id, $order)
-{
-    $enable_admin_notification = get_option('enable_admin_facebook_notification');
-    if ($enable_admin_notification==='yes') {
-      $order_number = $order->get_order_number();
-      $order_status = $order->get_status();
-      $service_date = $order->get_date_created()->format('Y-m-d H:i:s');
-      $shop_name = get_bloginfo('name');
-      $service_time = get_post_meta($order->get_id(), '_wowrestro_service_time', true);
-      $service_type = get_post_meta($order->get_id(), '_wowrestro_service_type', true);
-      $notification_message = get_option('admin_facebook_text');
-      // Replace placeholders with actual order data
-      $notification_message = str_replace('{ORDER_NUMBER}', $order_number, $notification_message);
-      $notification_message = str_replace('{ORDER_STATUS}', $order_status, $notification_message);
-      $admin_facebook_text = str_replace('{ORDER_NUMBER}', $order_number,  $notification_message);
-      $notification_message = str_replace('{ORDER_STATUS}', $order_status,  $notification_message);
-      $notification_message = str_replace('{SHOP_NAME}', $shop_name,  $notification_message);
-      $notification_message = str_replace('{SERVICE_DATE}', $service_date,  $notification_message);
-      $notification_message = str_replace('{SERVICE_TIME}', $service_time,  $notification_message);
-      $notification_message = str_replace('{SERVICE_TYPE}', $service_type,  $notification_message);
-      // Create an instance of your Facebook notification service
-         $facebook_notification_service = new WWRO_Facebook_Notification_Service();
-        // Send the Facebook notification with the customized message
-          $response = $facebook_notification_service->send_text_notification($notification_message);  
-    }
-}
+ public function wr_api_new_order_notification($payment_id, $order)
+  {
+      $enable_admin_notification = get_option('enable_admin_facebook_notification');
+      if ($enable_admin_notification === 'yes') {
+          $order_number = $order->get_order_number();
+          $order_status = $order->get_status();
+          $service_date = $order->get_date_created()->format('Y-m-d H:i:s');
+          $shop_name = get_bloginfo('name');
+          $service_time = get_post_meta($order->get_id(), '_wowrestro_service_time', true);
+          $service_type = get_post_meta($order->get_id(), '_wowrestro_service_type', true);
+          $billing_fname = $order->get_billing_first_name();
+          $full_name = $order->get_billing_first_name() . ' ' . $order->get_billing_last_name();
+          $phone = $order->get_billing_phone();
+          $price = $order->get_total();
+  
+          $notification_message = get_option('admin_facebook_text');
+          // Replace placeholders with actual order data
+          $notification_message = str_replace('{ORDER_NUMBER}', $order_number, $notification_message);
+          $notification_message = str_replace('{ORDER_STATUS}', $order_status, $notification_message);
+          $notification_message = str_replace('{SHOP_NAME}', $shop_name, $notification_message);
+          $notification_message = str_replace('{SERVICE_DATE}', $service_date, $notification_message);
+          $notification_message = str_replace('{SERVICE_TIME}', $service_time, $notification_message);
+          $notification_message = str_replace('{SERVICE_TYPE}', $service_type, $notification_message);
+          $notification_message = str_replace('{BILLING_FNAME}', $billing_fname, $notification_message);
+          $notification_message = str_replace('{FULLNAME}', $full_name, $notification_message);
+          $notification_message = str_replace('{PHONE}', $phone, $notification_message);
+          $notification_message = str_replace('{PRICE}', $price, $notification_message);
+  
+          // Create an instance of your Facebook notification service
+          $facebook_notification_service = new WWRO_Facebook_Notification_Service();
+          // Send the Facebook notification with the customized message
+          $response = $facebook_notification_service->send_text_notification($notification_message);
+      }
+  }
 public function wwro_facebook_test_notification_service() {
   // Get the recipient user ID and test message from the AJAX request
   $recipient_user_id = sanitize_text_field($_POST[ 'recipient_user_id' ]);
